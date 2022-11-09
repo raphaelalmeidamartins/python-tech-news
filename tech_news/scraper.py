@@ -1,5 +1,6 @@
 import requests
 from ratelimiter import RateLimiter
+from parsel import Selector
 
 
 # Requisito 1
@@ -23,6 +24,8 @@ def fetch(url):
 # Requisito 2
 def scrape_novidades(html_content):
     """Seu código deve vir aqui"""
+    selector = Selector(html_content)
+    return selector.css(".entry-title a::attr(href)").getall()
 
 
 # Requisito 3
