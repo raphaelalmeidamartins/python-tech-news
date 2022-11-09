@@ -4,7 +4,7 @@ from ratelimiter import RateLimiter
 
 # Requisito 1
 @RateLimiter(max_calls=1, period=1)
-def fetch(url: str) -> str | None:
+def fetch(url):
     try:
         response = requests.get(
             url,
