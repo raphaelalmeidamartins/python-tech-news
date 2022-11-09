@@ -1,6 +1,23 @@
+import requests
+from ratelimiter import RateLimiter
+
+
 # Requisito 1
-def fetch(url):
-    """Seu código deve vir aqui"""
+@RateLimiter(max_calls=1, period=1)
+def fetch(url: str) -> str | None:
+    try:
+        response = requests.get(
+            url,
+            timeout=3,
+            headers={"user-agent": "Fake user-agent"}
+        )
+        response.raise_for_status()
+    except (requests.HTTPError, requests.ReadTimeout):
+        return None
+    else:
+        return response.text
+
+# Dica de Lais Namatela 19A - https://pypi.org/project/ratelimiter/#description
 
 
 # Requisito 2
