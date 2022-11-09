@@ -46,7 +46,7 @@ def scrape_noticia(html_content):
         "comments_count": len(selector.css(".comment-list li").getall()) or 0,
         "summary": BeautifulSoup(
             selector.css(".entry-content p").get(), "html.parser"
-        ).get_text(),
+        ).get_text().strip(),
         "tags": selector.css("a[rel=tag]::text").getall(),
         "category": selector.css(".label::text").get(),
     }
