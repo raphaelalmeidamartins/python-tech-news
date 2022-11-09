@@ -1,6 +1,7 @@
 import requests
-from ratelimiter import RateLimiter
+from bs4 import BeautifulSoup
 from parsel import Selector
+from ratelimiter import RateLimiter
 
 
 # Requisito 1
@@ -8,15 +9,14 @@ from parsel import Selector
 def fetch(url):
     try:
         response = requests.get(
-            url,
-            timeout=3,
-            headers={"user-agent": "Fake user-agent"}
+            url, timeout=3, headers={"user-agent": "Fake user-agent"}
         )
         response.raise_for_status()
     except (requests.HTTPError, requests.ReadTimeout):
         return None
     else:
         return response.text
+
 
 # Dica de Lais Namatela 19A - https://pypi.org/project/ratelimiter/#description
 
@@ -36,7 +36,20 @@ def scrape_next_page_link(html_content):
 
 # Requisito 4
 def scrape_noticia(html_content):
-    """Seu código deve vir aqui"""
+    selector = Selector(html_content)
+
+    return {
+        "url": selector.css("link[rel='canonical']::attr(href)").get(),
+        "title": selector.css("h1.entry-title::text").get().strip(),
+        "timestamp": selector.css(".meta-date::text").get(),
+        "writer": selector.css(".meta-author .author a::text").get(),
+        "comments_count": len(selector.css(".comment-list li").getall()) or 0,
+        "summary": BeautifulSoup(
+            selector.css(".entry-content p").get(), "html.parser"
+        ).get_text(),
+        "tags": selector.css("a[rel=tag]::text").getall(),
+        "category": selector.css(".label::text").get(),
+    }
 
 
 # Requisito 5
