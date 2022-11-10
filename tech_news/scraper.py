@@ -3,13 +3,17 @@ from bs4 import BeautifulSoup
 from parsel import Selector
 from ratelimiter import RateLimiter
 
+from tech_news.database import create_news
+
 
 # Requisito 1
 @RateLimiter(max_calls=1, period=1)
 def fetch(url):
     try:
         response = requests.get(
-            url, timeout=3, headers={"user-agent": "Fake user-agent"}
+            url,
+            timeout=3,
+            headers={"user-agent": "Fake user-agent"}
         )
         response.raise_for_status()
     except (requests.HTTPError, requests.ReadTimeout):
@@ -46,7 +50,9 @@ def scrape_noticia(html_content):
         "comments_count": len(selector.css(".comment-list li").getall()) or 0,
         "summary": BeautifulSoup(
             selector.css(".entry-content p").get(), "html.parser"
-        ).get_text().strip(),
+        )
+        .get_text()
+        .strip(),
         "tags": selector.css("a[rel=tag]::text").getall(),
         "category": selector.css(".label::text").get(),
     }
@@ -54,4 +60,20 @@ def scrape_noticia(html_content):
 
 # Requisito 5
 def get_tech_news(amount):
-    """Seu código deve vir aqui"""
+    html_content = fetch("https://blog.betrybe.com/")
+    news_url_list = []
+
+    while len(news_url_list) < amount:
+        news_url_list += scrape_novidades(html_content)
+
+        if len(news_url_list) < amount:
+            html_content = fetch(scrape_next_page_link(html_content))
+
+    news_dicts_list = [
+        scrape_noticia(fetch(url))
+        for url in news_url_list[0:amount]
+    ]
+
+    create_news(news_dicts_list)
+
+    return news_dicts_list
