@@ -36,7 +36,12 @@ def search_by_date(date):
 
 # Requisito 8
 def search_by_tag(tag):
-    """Seu código deve vir aqui"""
+    query = {"tags": {"$elemMatch": {"$regex": tag, "$options": "i"}}}
+    news_list = search_news(query)
+    return [
+        (news["title"], news["url"])
+        for news in news_list
+    ]
 
 
 # Requisito 9
