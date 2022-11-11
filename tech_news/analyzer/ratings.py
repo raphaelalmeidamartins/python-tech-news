@@ -1,14 +1,33 @@
-from tech_news.database import search_news
+from tech_news.database import find_news
 
 
 # Requisito 10
 def top_5_news():
-    query = {"$sort": {"comments_count": -1, "$limit": 5}}
-    news_list = search_news(query)
-    return [
+    news_list = sorted(
+        find_news(),
+        key=lambda news: (-news["comments_count"], news["title"]),
+    )
+
+    result = [
         (news["title"], news["url"])
         for news in news_list
     ]
+
+    return result[0:5]
+
+    """
+        Descobri sobre a utilização do sorted para ordenar discionários aqui:
+        https://stackoverflow.com/questions/613183/how-do-i-sort-a-dictionary-by-value
+    """
+
+    """
+        Após a aprovação no projeto,
+        não esquecer de refatorar
+        essa função para usar
+        o método agregate do mongoDB
+        com a query abaixo
+        query = [{"$sort": {"comments_count": -1, "title": 1}}, {"$limit": 5}]
+    """
 
 
 # Requisito 11
